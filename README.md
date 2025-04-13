@@ -14,3 +14,5 @@ Thanks for understanding! 😊
 ---
 
 *Made with effort, even if it's not flashy.*
+
+![Funny Meme](https://github.com/mariessmariee/one/blob/main/meme.jpg?raw=true)
