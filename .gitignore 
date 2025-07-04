@@ -3,3 +3,11 @@ __pycache__/
 .idea/
 *.pyc
 .DS_Store
+# IDE settings
+.idea/
+*.iml
+misc.xml
+modules.xml
+vcs.xml
+
+
