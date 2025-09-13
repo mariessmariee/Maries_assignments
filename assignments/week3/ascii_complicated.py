@@ -1,40 +1,61 @@
 import random
-import time
 
-height = int(input("Enter the height of the heart tile (suggest 5-10): "))
-width = int(input("Enter the width of the heart tile (suggest 5-10): "))
-symbol = input("Enter a cute symbol (like ❤️, 💖, ✨, 🌸, or just *): ")
+import time, random, math
 
-background_choices = ['.', '･ﾟ', ' ', '*', '`']
+def ask_int_in_range(prompt, lo, hi):
+    while True:
+        s = input(f"{prompt} [{lo}-{hi}]: ").strip()
+        try:
+            v = int(s)
+            if lo <= v <= hi:
+                return v
+            print(f"Please enter a number between {lo} and {hi}.")
+        except ValueError:
+            print("Please enter a valid integer.")
 
-if symbol == "💖":
-    background_choices = ['✨', '🌟', '🦄', '💫']
+def ask_symbol(prompt):
+    while True:
+        s = input(prompt).strip()
+        if s:
+            return s[0]
+        print("Please enter at least one character.")
 
-def create_tile(h, w, symbol):
+height = ask_int_in_range("Heart tile height", 5, 20)
+width = ask_int_in_range("Heart tile width", 7, 35)
+symbol = ask_symbol("Enter a cute symbol (e.g., ❤, ✨, *, +): ")
+
+background_pool_basic = ['.', '`', ' ', '*', '+']
+background_pool_spark = ['.', '*', '+']
+
+theme = input("Theme (classic/sparkle): ").strip().lower()
+if theme not in {"classic", "sparkle"}:
+    theme = "classic"
+
+def make_heart_tile(h, w, fill, theme):
     tile = []
-    for row in range(h):
-        line = ""
-        for col in range(w):
-            if (row == 0 and (col == 1 or col == w-2)) or \
-               (row == 1 and (col == 0 or col == 2 or col == w-3 or col == w-1)) or \
-               (row == 2 and (col == 1 or col == w-2)) or \
-               (row == 3 and (col == 2 or col == w-3)) or \
-               (row == 4 and (col == w//2)):
-                line += symbol
+    for r in range(h):
+        row_chars = []
+        y = 1.3 - 2.6 * (r / (h - 1))
+        for c in range(w):
+            x = -1.3 + 2.6 * (c / (w - 1))
+            inside = (x**2 + y**2 - 1)**3 - x**2 * y**3 <= 0
+            if inside:
+                row_chars.append(fill)
             else:
-                line += random.choice(background_choices)
-        tile.append(line)
+                if theme == "sparkle":
+                    row_chars.append(random.choice(background_pool_spark))
+                else:
+                    row_chars.append(random.choice(background_pool_basic))
+        tile.append("".join(row_chars))
     return tile
 
-tile = create_tile(height, width, symbol)
+tile = make_heart_tile(height, width, symbol, theme)
 
-repeat_x = int(input("How many hearts across? (2-5 suggested): "))
-repeat_y = int(input("How many hearts down? (2-5 suggested): "))
+repeat_x = ask_int_in_range("How many hearts across", 1, 5)
+repeat_y = ask_int_in_range("How many hearts down", 1, 5)
 
-for y in range(repeat_y):
+for _ in range(repeat_y):
     for row in tile:
-        for x in range(repeat_x):
-            print(row, end="  ")
-        print()
+        print(("  ".join([row] * repeat_x)))
         time.sleep(0.1)
     print()
