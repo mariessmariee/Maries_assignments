@@ -1,7 +1,6 @@
 import time
 import random
 
-# Constants
 CLOSE_CHANCE = 90
 MEDIUM_CHANCE = 60
 FAR_CHANCE = 30
