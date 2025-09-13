@@ -8,13 +8,12 @@ FAR_CHANCE = 30
 WAIT_TIME = 1
 
 
-# Helper Functions
 def pause():
     time.sleep(WAIT_TIME)
 
 
 def get_chance(distance):
-    # This function returns the chance of scoring based on distance
+  
     if distance == 1:
         return CLOSE_CHANCE
     elif distance == 2:
@@ -22,7 +21,7 @@ def get_chance(distance):
     elif distance == 3:
         return FAR_CHANCE
     else:
-        return 0  # in case of an unexpected value
+        return 0 
 
 
 def play_turn(name, color):
