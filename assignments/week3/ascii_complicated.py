@@ -1,110 +1,59 @@
-import time, random, sys
+import time, random, math
 
-WAIT = 0.6
-CLOSE = 78
-MID = 54
-FAR = 34
-VIBE_BOOST = {"music": 4, "meditate": 3, "hype": 6}
-DIFF_MOD = {1: +12, 2: +6, 3: 0, 4: -8, 5: -14}
-
-def pause(t=WAIT):
-    time.sleep(t)
-
-def type_out(s, sp=0.02):
-    for ch in s:
-        sys.stdout.write(ch); sys.stdout.flush(); time.sleep(sp)
-    print()
-
-def ask_choice(prompt, opts):
-    opts_l = [o.lower() for o in opts]
+def ask_int_in_range(prompt, lo, hi):
     while True:
-        a = input(prompt).strip().lower()
-        if a in opts_l: return a
-        print("Options:", ", ".join(opts_l))
-
-def ask_int(prompt, lo, hi):
-    while True:
-        s = input(f"{prompt} ({lo}-{hi}): ").strip()
+        s = input(f"{prompt} [{lo}-{hi}]: ").strip()
         try:
             v = int(s)
-            if lo <= v <= hi: return v
-            print(f"Enter {lo}-{hi}.")
+            if lo <= v <= hi:
+                return v
+            print(f"Please enter a number between {lo} and {hi}.")
         except ValueError:
-            print("Enter a number.")
+            print("Please enter a valid integer.")
 
-def base_chance(dist):
-    return CLOSE if dist == 1 else MID if dist == 2 else FAR
-
-def shot_outcome(dist, vibe, diff, jersey):
-    c = base_chance(dist)
-    c += VIBE_BOOST.get(vibe, 0)
-    c += DIFF_MOD.get(diff, 0)
-    if jersey.lower() in {"gold","crimson","royal","white"}: c += 3
-    return max(5, min(92, c))
-
-def scene_pregame():
-    name = input("Your name: ").strip() or "Rookie"
-    color = input("Jersey color: ").strip() or "black"
-    vibe = ask_choice("Pregame (music/meditate/hype): ", ["music","meditate","hype"])
-    diff = ask_int("Difficulty", 1, 5)
-    return name, color, vibe, diff
-
-def scene_action(name, color, vibe, diff):
-    type_out(f"Alright {name}, in your {color} jersey — tip-off!")
-    pause()
-    act = ask_choice("Action (shoot/pass): ", ["shoot","pass"])
-    score = 0
-    if act == "shoot":
-        dist = ask_int("Distance 1=close 2=mid 3=far", 1, 3)
-        chance = shot_outcome(dist, vibe, diff, color)
-        type_out(f"Shooting… (chance {chance}%)", 0.015); pause(0.9)
-        if random.randint(1,100) <= chance:
-            print("Score!")
-            score += 3 if dist == 3 else 2
-            if dist == 3: print("Deep three!")
-        else:
-            print("Miss.")
-            if diff >= 4: print("Tough defense tonight.")
-    else:
-        mate = ask_choice("Pass to A (shooter) or B (slasher): ", ["a","b"])
-        if mate == "a":
-            base = 56 + VIBE_BOOST.get(vibe, 0) + DIFF_MOD.get(diff, 0)
-            print("Catch-and-shoot…"); pause()
-            if random.randint(1,100) <= max(5, min(90, base)): print("Splash! Assist." ); score += 3
-            else: print("Rim out.")
-        else:
-            base = 60 + (3 if color.lower() in {"gold","white"} else 0)
-            print("Baseline cut…"); pause()
-            if random.randint(1,100) <= base: print("And-one!"); score += 2
-            else: print("Blocked!")
-    return score
-
-def scene_final(score, vibe, diff):
-    risk = ask_choice("Final play (risk/safe): ", ["risk","safe"])
-    if risk == "risk":
-        ch = 44 + VIBE_BOOST.get(vibe, 0) + DIFF_MOD.get(diff, 0)
-        print("Stepback at the buzzer…"); pause()
-        if random.randint(1,100) <= max(5, min(88, ch)): print("Buzzer-beater!"); score += 3
-        else: print("Just off…")
-    else:
-        ch = 62 + (2 if vibe == "meditate" else 0) + DIFF_MOD.get(diff, 0)
-        print("Run a safe set…"); pause()
-        if random.randint(1,100) <= max(5, min(90, ch)): print("Solid bucket."); score += 2
-        else: print("Short.")
-    print(f"Total points: {score}")
-    if score >= 6: print("MVP vibes.")
-    elif score >= 3: print("Strong contribution.")
-    else: print("Back to drills.")
-    return score
-
-def main():
-    type_out("🏀 Welcome to the Mini Basketball Game!")
+def ask_symbol(prompt):
     while True:
-        name, color, vibe, diff = scene_pregame()
-        sc = scene_action(name, color, vibe, diff)
-        scene_final(sc, vibe, diff)
-        again = ask_choice("Play again? (yes/no): ", ["yes","no"])
-        if again == "no": print("GGs — thanks for playing!"); break
+        s = input(prompt).strip()
+        if s:
+            return s[0]
+        print("Please enter at least one character.")
 
-if __name__ == "__main__":
-    main()
+height = ask_int_in_range("Heart tile height", 5, 20)
+width = ask_int_in_range("Heart tile width", 7, 35)
+symbol = ask_symbol("Enter a cute symbol (e.g., ❤, ✨, *, +): ")
+
+background_pool_basic = ['.', '`', ' ', '*', '+']
+background_pool_spark = ['.', '*', '+']
+
+theme = input("Theme (classic/sparkle): ").strip().lower()
+if theme not in {"classic", "sparkle"}:
+    theme = "classic"
+
+def make_heart_tile(h, w, fill, theme):
+    tile = []
+    for r in range(h):
+        row_chars = []
+        y = 1.3 - 2.6 * (r / (h - 1))
+        for c in range(w):
+            x = -1.3 + 2.6 * (c / (w - 1))
+            inside = (x**2 + y**2 - 1)**3 - x**2 * y**3 <= 0
+            if inside:
+                row_chars.append(fill)
+            else:
+                if theme == "sparkle":
+                    row_chars.append(random.choice(background_pool_spark))
+                else:
+                    row_chars.append(random.choice(background_pool_basic))
+        tile.append("".join(row_chars))
+    return tile
+
+tile = make_heart_tile(height, width, symbol, theme)
+
+repeat_x = ask_int_in_range("How many hearts across", 1, 5)
+repeat_y = ask_int_in_range("How many hearts down", 1, 5)
+
+for _ in range(repeat_y):
+    for row in tile:
+        print(("  ".join([row] * repeat_x)))
+        time.sleep(0.1)
+    print()
